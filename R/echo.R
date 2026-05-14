@@ -1,6 +1,6 @@
 #' ECHO
 #' 
-#' A function that implements ECHO
+#' `echo` will estimate the number of cryptic cases related to a phylogenetic tree. 
 #' 
 #' @param tree The phylogenetic tree(s) for which ECHO will estimate cryptic case counts.
 #' Can be an object of class `phylo`, `treedata`, or a numeric value equal to the total branch length of the tree.
@@ -19,6 +19,15 @@
 #' - `A`: A list containing the point estimate(s) and confidence interval(s) corresponding to ECHO-A (see Details).
 #' - `B`: A list containing the point estimate(s) and confidence interval(s) corresponding to ECHO-B (see Details).
 #' - `C`: A list containing the point estimate(s) and confidence interval(s) corresponding to ECHO-C (see Details).
+#' 
+#' @examples
+#' tree <- ape::read.tree("../data-raw/example_tree.nwk")
+#' result <- echo(tree, n_samples=31, latent_duration=10, infectious_duration=8, Re=2, time_scale="days")
+#' 
+#' result
+#' 
+#' summary(result)
+#' 
 #' @export
 echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time_scale="years", CI=0.95) {
   ## PROCESS INPUTS
@@ -41,9 +50,9 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
   if(is.numeric(tree)) {
     n_trees <- length(tree)
   } else{
-    if(class(tree) %in% c("phylo", "treedata")) {
+    if(inherits(tree, c("phylo", "treedata"))) {
       n_trees <- 1
-    } else if(class(tree) == "multiPhylo") {
+    } else if(inherits(tree, "multiPhylo")) {
       n_trees <- length(tree)
     } else{
       stop("Input tree not valid type. Please see documentation.")
@@ -54,7 +63,7 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
   if(n_trees == 1) {
     if(is.numeric(tree)) {
       L <- ifelse(time_scale=="days", tree, tree*362.25)
-    } else if(class(tree)=="phylo") {
+    } else if(inherits(tree, "phylo")) {
       L <- length_from_phylo(tree, time_scale)
     } else {
       L <- length_from_treedata(tree, time_scale)
@@ -67,7 +76,7 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
       } else {
         L <- lapply(tree, `*`, 365.25)
       }
-    } else if(class(tree) == "multiPhylo") {
+    } else if(inherits(tree, "multiPhylo")) {
       L <- lapply(tree, length_from_phylo, time_scale=time_scale)
     } else {
       L <- lapply(tree, length_from_treedata, time_scale=time_scale)
@@ -149,6 +158,8 @@ MLE_B <- function(total_length, n_obs, thetaL, thetaI) {
 
 # Estimator C -- infectious only
 MLE_C <- function(total_length, n_obs, thetaL, thetaI, Re) {
+  if(is.na(Re))
+    return(NA)
   L <- total_length * thetaI / (thetaL + thetaI)
   theta <- thetaI / (1 + Re)
   m0 <- max(L/theta, 1)
@@ -157,6 +168,10 @@ MLE_C <- function(total_length, n_obs, thetaL, thetaI, Re) {
 }
 
 # 
-CI_A <- function(n, alpha) n + qnorm(1-alpha/2) / sqrt(trigamma(n)) * c(-1, 1)
-CI_B <- function(N, n_obs, alpha) N + qnorm(1-alpha/2) / sqrt(trigamma(N+n_obs+(N-n_obs)/2)) * c(-1, 1)
-CI_C <- function(n, n_obs, alpha) n + qnorm(1-alpha/2) / sqrt(trigamma(n+n_obs)) * c(-1, 1)
+CI_A <- function(n, alpha) n + stats::qnorm(1-alpha/2) / sqrt(trigamma(n)) * c(-1, 1)
+CI_B <- function(N, n_obs, alpha) N + stats::qnorm(1-alpha/2) / sqrt(trigamma(N+n_obs+(N-n_obs)/2)) * c(-1, 1)
+CI_C <- function(n, n_obs, alpha){
+  if(is.na(n))
+    return(c(NA, NA))
+  return(n + stats::qnorm(1-alpha/2) / sqrt(trigamma(n+n_obs)) * c(-1, 1))
+}
