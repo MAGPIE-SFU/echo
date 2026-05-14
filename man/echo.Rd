@@ -18,7 +18,7 @@ echo(
 
 \method{print}{echo}(x, ...)
 
-\method{summary}{echo}(x, CI = 0.95, ...)
+\method{summary}{echo}(x, credible_interval = 0.95, ...)
 }
 \arguments{
 \item{tree}{The phylogenetic tree(s) for which ECHO will estimate cryptic case counts.
@@ -36,7 +36,11 @@ If you want \code{echo} to process a posterior sample of trees, input the sample
 \item{time_scale}{String indicating the time scale that \code{tree} is measured in.
 Can be either \code{"days"} or \code{"years"}. Default value is \code{"years"}.}
 
-\item{CI}{Level of the credible intervals. Only applicable if \code{n_trees>1}.}
+\item{CI}{The desired coverage probability of the confidence intervals. Must be a single value between 0 and 1. Default value is 0.95.}
+
+\item{x}{Object of class \code{echo}.}
+
+\item{credible_interval}{Level of the credible intervals. Only applicable if \code{n_trees>1}.}
 }
 \value{
 An object of class \code{echo}. Contains the following elements:
@@ -49,5 +53,14 @@ An object of class \code{echo}. Contains the following elements:
 }
 }
 \description{
-A function that implements ECHO
+\code{echo} will estimate the number of cryptic cases related to a phylogenetic tree.
+}
+\examples{
+tree <- ape::read.tree("../data-raw/example_tree.nwk")
+result <- echo(tree, n_samples=31, latent_duration=10, infectious_duration=8, Re=2, time_scale="days")
+
+result
+
+summary(result)
+
 }
