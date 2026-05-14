@@ -3,4 +3,5 @@
 S3method(print,echo)
 S3method(summary,echo)
 export(echo)
+export(export_echo)
 export(extract_df)

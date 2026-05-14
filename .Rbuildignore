@@ -1,2 +1,4 @@
 ^echo\.Rproj$
 ^\.Rproj\.user$
+^doc$
+^Meta$
