@@ -1,7 +1,7 @@
 #' @rdname echo
-#' @param CI Level of the credible intervals. Only applicable if `n_trees>1`.
+#' @param credible_interval Level of the credible intervals. Only applicable if `n_trees>1`.
 #' @export
-summary.echo <- function(x, CI=0.95, ...) {
+summary.echo <- function(x, credible_interval=0.95, ...) {
   if(x$n_trees == 1) {
     tab <- data.frame(
       Estimator = c("ECHO-A", "ECHO-B", "ECHO-C"),
@@ -21,15 +21,15 @@ summary.echo <- function(x, CI=0.95, ...) {
   } else {
     tab <- data.frame(
       Estimator = c("A", "B", "C"),
-      `Point Estimate` = c(format_interval(x$A$point, alpha=1-CI), 
-                           format_interval(x$B$point, alpha=1-CI), 
-                           format_interval(x$C$point, alpha=1-CI)),
-      `Lower CI` = c(format_interval(x$A$CI[1,], alpha=1-CI), 
-                     format_interval(x$B$CI[1,], alpha=1-CI), 
-                     format_interval(x$C$CI[1,], alpha=1-CI)),
-      `Upper CI` = c(format_interval(x$A$CI[2,], alpha=1-CI), 
-                     format_interval(x$B$CI[2,], alpha=1-CI), 
-                     format_interval(x$C$CI[2,], alpha=1-CI)),
+      `Point Estimate` = c(format_interval(x$A$point, alpha=1-credible_interval), 
+                           format_interval(x$B$point, alpha=1-credible_interval), 
+                           format_interval(x$C$point, alpha=1-credible_interval)),
+      `Lower CI` = c(format_interval(x$A$CI[1,], alpha=1-credible_interval), 
+                     format_interval(x$B$CI[1,], alpha=1-credible_interval), 
+                     format_interval(x$C$CI[1,], alpha=1-credible_interval)),
+      `Upper CI` = c(format_interval(x$A$CI[2,], alpha=1-credible_interval), 
+                     format_interval(x$B$CI[2,], alpha=1-credible_interval), 
+                     format_interval(x$C$CI[2,], alpha=1-credible_interval)),
       check.names = F,
       stringsAsFactors=F
     )
@@ -70,55 +70,11 @@ summary.echo <- function(x, CI=0.95, ...) {
   cat(strrep("-", sum(widths)), "\n", sep = "")
   
   invisible(tab)
-  
-  # class(tab) <- c("summary.echo", class(tab))
-  # return(tab)
 }
-
-
-# print.summary.echo <- function(x, ...) {
-#   widths <- sapply(seq_along(x), function(i) {
-#     max(nchar(c(names(x)[i], as.character(x[[i]])))) + 2
-#   })
-#   cat("\nECHO Summary\n\n")
-# 
-#   cat("Run with:\n ", x)
-# 
-#   cat(
-#     format(names(x)[1], width = widths[1], justify = "left"),
-#     format(names(x)[2], width = widths[2], justify = "centre"),
-#     format(names(x)[3], width = widths[3], justify = "centre"),
-#     format(names(x)[4], width = widths[4], justify = "centre"),
-#     "\n",
-#     sep = ""
-#   )
-# 
-#   cat(strrep("-", sum(widths)), "\n", sep = "")
-# 
-#   # Rows
-#   for (i in seq_len(nrow(x))) {
-#     cat(
-#       format(x[i, 1], width = widths[1], justify = "centre"),
-#       format(x[i, 2], width = widths[2], justify = "right"),
-#       format(x[i, 3], width = widths[3], justify = "right"),
-#       format(x[i, 4], width = widths[4], justify = "right"),
-#       "\n",
-#       sep = ""
-#     )
-#   }
-# 
-#   cat(strrep("-", sum(widths)), "\n", sep = "")
-# 
-#   invisible(x)
-# }
 
 format_interval <- function(x, alpha) {
-  med <- quantile(x, probs=0.5, na.rm=T)
-  L <- quantile(x, probs=alpha/2, na.rm=T)
-  U <- quantile(x, probs=1-alpha/2, na.rm=T)
+  med <- stats::quantile(x, probs=0.5, na.rm=T)
+  L <- stats::quantile(x, probs=alpha/2, na.rm=T)
+  U <- stats::quantile(x, probs=1-alpha/2, na.rm=T)
   sprintf("%.2f (%.2f, %.2f)", med, L, U)
 }
-
-# format_confidence_interval <- function(x, l, u) {
-#   sprintf
-# }
