@@ -3,7 +3,7 @@
 #' `echo` will estimate the number of cryptic cases related to a phylogenetic tree. 
 #' 
 #' @param tree The phylogenetic tree(s) for which ECHO will estimate cryptic case counts.
-#' Can be an object of class `phylo`, `treedata`, or a numeric value equal to the total branch length of the tree.
+#' Can be an object of class `phylo`, `treedata`, a string indicating the filepath of a Newick file, or a numeric value equal to the total branch length of the tree.
 #' If you want `echo` to process a posterior sample of trees, input the sample either as a list or a vector.
 #' @param n_samples The number of samples. This should be equal to the number of tips in the phylogeny.
 #' @param latent_duration The average duration of the latent period in days.
@@ -54,6 +54,9 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
       n_trees <- 1
     } else if(inherits(tree, "multiPhylo")) {
       n_trees <- length(tree)
+    } else if(is.character(tree)) {
+      tree <- read_newick(tree)
+      n_trees <- 1
     } else{
       stop("Input tree not valid type. Please see documentation.")
     }
@@ -65,6 +68,8 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
       L <- ifelse(time_scale=="days", tree, tree*362.25)
     } else if(inherits(tree, "phylo")) {
       L <- length_from_phylo(tree, time_scale)
+    } else if(inherits(tree, "echo_tree")) {
+      L <- ifelse(time_scale=="days", sum(tree$edge$length), sum(tree$edge$length)*365.25)
     } else {
       L <- length_from_treedata(tree, time_scale)
     }
