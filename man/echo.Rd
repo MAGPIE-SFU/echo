@@ -22,7 +22,7 @@ echo(
 }
 \arguments{
 \item{tree}{The phylogenetic tree(s) for which ECHO will estimate cryptic case counts.
-Can be an object of class \code{phylo}, \code{treedata}, or a numeric value equal to the total branch length of the tree.
+Can be an object of class \code{phylo}, \code{treedata}, a string indicating the filepath of a Newick file, or a numeric value equal to the total branch length of the tree.
 If you want \code{echo} to process a posterior sample of trees, input the sample either as a list or a vector.}
 
 \item{n_samples}{The number of samples. This should be equal to the number of tips in the phylogeny.}
