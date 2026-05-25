@@ -180,3 +180,12 @@ CI_C <- function(n, n_obs, alpha){
     return(c(NA, NA))
   return(n + stats::qnorm(1-alpha/2) / sqrt(trigamma(n+n_obs)) * c(-1, 1))
 }
+
+# Function for converting echo object back to list for JS processing
+echo_to_js <- function(x) {
+  list(A = x$A,
+       B = x$B,
+       C = x$C,
+       n_trees = x$n_trees,
+       n_samples = x$n_samples)
+}
