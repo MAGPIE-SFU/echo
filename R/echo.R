@@ -182,6 +182,7 @@ CI_C <- function(n, n_obs, alpha){
 }
 
 # Function for converting echo object back to list for JS processing
+#' @export
 echo_to_js <- function(x) {
   list(A = x$A,
        B = x$B,
