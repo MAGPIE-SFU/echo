@@ -184,9 +184,9 @@ CI_C <- function(n, n_obs, alpha){
 # Function for converting echo object back to list for JS processing
 #' @export
 echo_to_js <- function(x) {
-  list(A = x$A,
-       B = x$B,
-       C = x$C,
+  list(A = list(point=x$A$point, CI=x$A$CI),
+       B = list(point=x$B$point, CI=x$B$CI),
+       C = list(point=x$C$point, CI=x$C$CI),
        n_trees = x$n_trees,
        n_samples = x$n_samples)
 }
