@@ -39,12 +39,11 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
   if(!is.numeric(infectious_duration) || is.na(infectious_duration) || infectious_duration <= 0)
     stop("infectious_duration must be positive.")
   
-  if(!is.numeric(Re) || Re <= 0)
+  if(!is.numeric(Re) || any(Re <= 0))
     stop("Re must be positive.")
   
   if(!(time_scale=="days" || time_scale=="years"))
     stop("time_scale must be 'days' or 'years'.")
-  
   
   # Check tree input type and check if multiple trees
   if(is.numeric(tree)) {
@@ -61,6 +60,9 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
       stop("Input tree not valid type. Please see documentation.")
     }
   }
+  
+  if(length(Re) < n_trees)
+    Re <- rep(Re, n_trees)
   
   # Check how the tree was input
   if(n_trees == 1) {
@@ -100,7 +102,7 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
   } else {
     A_list <- sapply(L, MLE_A, thetaL=latent_duration, thetaI=infectious_duration)
     B_list <- sapply(L, MLE_B, n_obs=n_samples, thetaL=latent_duration, thetaI=infectious_duration)
-    C_list <- sapply(L, MLE_C, n_obs=n_samples, thetaL=latent_duration, thetaI=infectious_duration, Re=Re)
+    C_list <- sapply(seq_along(L), function(i) MLE_C(L[[i]], n_obs=n_samples, thetaL=latent_duration, thetaI=infectious_duration, Re=Re[i]))
     
     A_int <- sapply(A_list, CI_A, alpha=1-CI)
     B_int <- sapply(B_list, CI_B, n_obs=n_samples, alpha=1-CI)
@@ -151,12 +153,13 @@ MLE_A <- function(total_length, thetaL, thetaI) {
 
 # Estimator B -- latent + infectious
 MLE_B <- function(total_length, n_obs, thetaL, thetaI) {
-  f <- function(M) {
-    m <- M - n_obs
-    theta <- (M*thetaL + (n_obs+m/2)*thetaI) / (M + n_obs + m/2)
-    return(-stats::dgamma(total_length, shape=M+n_obs+m/2, scale=theta, log=T))
-  }
-  res <- stats::optim(1, f, lower=1, method="L-BFGS-B")
+  theta <- (thetaL + thetaI) / 2
+  # f <- function(M) {
+    # m <- M - n_obs
+    # theta <- (M*thetaL + (n_obs+m/2)*thetaI) / (M + n_obs + m/2)
+    # return(-stats::dgamma(total_length, shape=M+n_obs+m/2, scale=theta, log=T))
+  # }
+  res <- stats::optim(1, function(m) -stats::dgamma(total_length, shape=2*m, scale=theta, log=T), lower=1, method="L-BFGS-B")
   return(res$par)
 }
 
