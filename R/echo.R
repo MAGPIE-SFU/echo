@@ -154,11 +154,6 @@ MLE_A <- function(total_length, thetaL, thetaI) {
 # Estimator B -- latent + infectious
 MLE_B <- function(total_length, n_obs, thetaL, thetaI) {
   theta <- (thetaL + thetaI) / 2
-  # f <- function(M) {
-    # m <- M - n_obs
-    # theta <- (M*thetaL + (n_obs+m/2)*thetaI) / (M + n_obs + m/2)
-    # return(-stats::dgamma(total_length, shape=M+n_obs+m/2, scale=theta, log=T))
-  # }
   res <- stats::optim(1, function(m) -stats::dgamma(total_length, shape=2*m, scale=theta, log=T), lower=1, method="L-BFGS-B")
   return(res$par)
 }
