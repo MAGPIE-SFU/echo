@@ -44,20 +44,23 @@ estimate_ascertainment <- function(echo_results,
     sampling_delay$scale <- sampling_delay$var / sampling_delay$mean
   }
   
-  pi <- sapply(seq_along(heights), function(i) solve_Epi(heights[i], 
-                                                         pE[i], 
-                                                         toi_distributions[[i]], 
-                                                         offspring_distribution, 
-                                                         generation_interval, 
-                                                         sampling_delay, 
-                                                         n_steps))
-  mean_pi <- sapply(seq_along(pi), function(i) Epi(pi[i], 
-                                                   heights[i], 
-                                                   toi_distributions[[i]], 
-                                                   sampling_delay))
+  fits <- future.apply::future_mapply(ascertain_one,
+                                      heights, pE, toi_distributions,
+                                      MoreArgs = list(offspring = offspring_distribution,
+                                                      generation = generation_interval,
+                                                      sampling = sampling_delay,
+                                                      n_steps = n_steps),
+                                      SIMPLIFY = FALSE)
+  pi <- sapply(fits, `[[`, "pi")
+  mean_pi <- sapply(fits, `[[`, "Epi")
   N <- sapply(mean_pi, function(x) n_seq / x)
 
   return(data.frame(N=N, Epi=mean_pi, pi=pi, pE=pE))
+}
+
+ascertain_one <- function(height, pE, toi, offspring, generation, sampling, n_steps) {
+  pi <- solve_Epi(height, pE, toi, offspring, generation, sampling, n_steps)
+  list(pi = pi, Epi = Epi(pi, height, toi, sampling))
 }
 
 # PGF for the negative binomial distribution with mean Re and dispersion parameter k
