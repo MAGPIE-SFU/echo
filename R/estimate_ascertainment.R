@@ -108,7 +108,7 @@ Ep0t <- Vectorize(function(pi, height, toi, generation, offspring, sampling, n_s
 # t_max: total depth of the tree in days
 Epi <- Vectorize(function(pi, height, toi, sampling) {
   f <- function(t) toi$fn(t, toi$pars) * stats::pgamma(t, shape=sampling$shape, scale=sampling$scale)
-  return(pi * stats::integrate(f, lower=0, upper=height)$value)
+  return(pi * stats::integrate(f, lower=0, upper=height, subdivisions=1000)$value)
 }, vectorize.args = c("pi", "height"))
 
 
