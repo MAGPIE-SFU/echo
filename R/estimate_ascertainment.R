@@ -120,5 +120,11 @@ solve_Epi <- Vectorize(function(height, pE, toi, offspring, generation, sampling
     return(LHS - RHS)
   }
   
-  return(stats::uniroot(f, lower=0, upper=0.999)$root)
+  tryCatch(stats::uniroot(f, lower=0.001, upper=0.999)$root,
+           error = function(e) {
+             warning("uniroot failed to find a solution for pi (height = ", height,
+                     ", pE = ", pE, "); returning NA. Original error: ",
+                     conditionMessage(e), call. = FALSE)
+             NA_real_
+           })
 }, vectorize.args = "height")

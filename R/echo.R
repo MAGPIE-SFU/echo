@@ -67,7 +67,7 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
   # Check how the tree was input
   if(n_trees == 1) {
     if(is.numeric(tree)) {
-      L <- ifelse(time_scale=="days", tree, tree*362.25)
+      L <- ifelse(time_scale=="days", tree, tree*365.25)
     } else if(inherits(tree, "phylo")) {
       L <- length_from_phylo(tree, time_scale)
     } else if(inherits(tree, "echo_tree")) {
@@ -93,7 +93,7 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
   ## RUN ECHO
   if(n_trees==1) {
     A_est <- MLE_A(L, latent_duration, infectious_duration)
-    B_est <- MLE_B(L, n_samples, latent_duration, infectious_duration)
+    B_est <- MLE_B(L, latent_duration, infectious_duration)
     C_est <- MLE_C(L, n_samples, latent_duration, infectious_duration, Re)
     
     res <- list(A=list(point=A_est, CI=CI_A(A_est, 1-CI)), 
@@ -101,7 +101,7 @@ echo <- function(tree, n_samples, latent_duration, infectious_duration, Re, time
                 C=list(point=C_est, CI=CI_C(C_est, n_samples, 1-CI)))
   } else {
     A_list <- sapply(L, MLE_A, thetaL=latent_duration, thetaI=infectious_duration)
-    B_list <- sapply(L, MLE_B, n_obs=n_samples, thetaL=latent_duration, thetaI=infectious_duration)
+    B_list <- sapply(L, MLE_B, thetaL=latent_duration, thetaI=infectious_duration)
     C_list <- sapply(seq_along(L), function(i) MLE_C(L[[i]], n_obs=n_samples, thetaL=latent_duration, thetaI=infectious_duration, Re=Re[i]))
     
     A_int <- sapply(A_list, CI_A, alpha=1-CI)
@@ -152,7 +152,7 @@ MLE_A <- function(total_length, thetaL, thetaI) {
 
 
 # Estimator B -- latent + infectious
-MLE_B <- function(total_length, n_obs, thetaL, thetaI) {
+MLE_B <- function(total_length, thetaL, thetaI) {
   theta <- (thetaL + thetaI) / 2
   res <- stats::optim(1, function(m) -stats::dgamma(total_length, shape=2*m, scale=theta, log=T), lower=1, method="L-BFGS-B")
   return(res$par)

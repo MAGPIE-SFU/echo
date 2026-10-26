@@ -13,7 +13,7 @@ summary.echo <- function(x, credible_interval=0.95, ...) {
                                  "N/A"),
       `Cryptic cases` = c("N/A",
                           "N/A",
-                          sprintf("%.2f (%.2f, %.2f)", x$B$point-x$n_samples, x$B$CI[1]-x$n_samples, x$B$CI[2]-x$n_samples)),
+                          sprintf("%.2f (%.2f, %.2f)", x$C$point-x$n_samples, x$C$CI[1]-x$n_samples, x$C$CI[2]-x$n_samples)),
       check.names = F,
       stringsAsFactors=F
     )
