@@ -77,6 +77,7 @@ Ep0t <- Vectorize(function(pi, height, toi, generation, offspring, sampling, n_s
   
   # the size of the time steps
   dt <- height / n_steps
+  t_steps <- dt*(0:n_steps)
   
   # the coefficients for the trapezoid rule
   coef <- c(0.5, rep(1,n_steps-1), 0.5)
@@ -86,7 +87,8 @@ Ep0t <- Vectorize(function(pi, height, toi, generation, offspring, sampling, n_s
   
   # compute the time density as the exponential grown function divided by a normalization constant
   # f_eval <- exp(r*(depth - dt*(1:n_steps))) / ((exp(r*depth)-1)/r)
-  f_eval <- toi$fn(dt*(0:n_steps), toi$pars)
+  f_eval <- toi$fn(t_steps, toi$pars)
+  Re_eval <- offspring$Re(t_steps)
   
   # initialize the expectation vector -- E[p0(0)] = 1*dt*ft
   # E <- dt*f_eval[1]
@@ -94,7 +96,7 @@ Ep0t <- Vectorize(function(pi, height, toi, generation, offspring, sampling, n_s
   # compute the value of p0(t) for each time step
   for(i in 1:n_steps) {
     omegabar[i+1] <- min(1, sum(coef[1:i]*dgammastore[seq(i,1,-1)]*omega[1:i]*dt)+1-stats::pgamma(i*dt,shape=generation$shape,scale=generation$scale))
-    omega[i+1] <- (1-pi*stats::pgamma(i*dt,shape=sampling$shape,scale=sampling$scale)) * G(omegabar[i+1], offspring$Re, offspring$k)
+    omega[i+1] <- (1-pi*stats::pgamma(i*dt,shape=sampling$shape,scale=sampling$scale)) * G(omegabar[i+1], Re_eval[i+1], offspring$k)
     # E <- E + (omega[i+1]*f_eval[i+1]+omega[i]*f_eval[i])/2*dt
   }
   
